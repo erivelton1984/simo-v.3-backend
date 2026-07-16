@@ -18,13 +18,7 @@ public class AuthController extends BaseController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(
-            @Valid @RequestBody LoginRequest request) {
-
-        return ok(
-                "Login realizado com sucesso.",
-                authenticationService.login(request)
-        );
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return ok("Login realizado com sucesso.", authenticationService.login(request));
     }
-
 }

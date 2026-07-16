@@ -13,7 +13,7 @@ public abstract class BaseService<T extends BaseEntity, ID> {
 
     protected abstract JpaRepository<T, ID> repository();
 
-    public List<T> findAll() {
+    protected List<T> findAll() {
         return repository().findAll();
     }
 
