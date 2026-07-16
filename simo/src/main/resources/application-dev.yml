@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/simo
+    username: postgres
+    password: p3dr03th4n
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+jwt:
+  secret: 7F5A5D1B9F6C8E3A4D2C1B8E9F5A6C7D4E3F2A1B9C8D7E6F5A4B3C2D1E9F8A7
+  expiration: 86400000

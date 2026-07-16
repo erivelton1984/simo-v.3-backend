@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: simo
+
+  profiles:
+    active: dev
