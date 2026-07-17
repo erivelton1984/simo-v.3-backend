@@ -6,13 +6,11 @@ public enum AttendanceAction {
 
     UPDATED,
 
-    TYPE_ADDED,
-
-    TYPE_REMOVED,
-
     CLOSED,
 
     REOPENED,
+
+    DEACTIVATED,
 
     CANCELLED
 
