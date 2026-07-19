@@ -3,7 +3,7 @@ package br.com.ciccr.simo.modules.attendance.service;
 import br.com.ciccr.simo.auth.current.CurrentUserService;
 import br.com.ciccr.simo.common.service.BaseService;
 import br.com.ciccr.simo.common.util.ProtocolGenerator;
-import br.com.ciccr.simo.modules.attendance.constants.AttendanceMessages;
+import br.com.ciccr.simo.modules.attendance.dto.request.AttendanceFilterRequest;
 import br.com.ciccr.simo.modules.attendance.dto.request.CreateAttendanceRequest;
 import br.com.ciccr.simo.modules.attendance.dto.request.UpdateAttendanceRequest;
 import br.com.ciccr.simo.modules.attendance.dto.response.AttendanceResponse;
@@ -17,14 +17,14 @@ import br.com.ciccr.simo.modules.attendance.repository.AttendanceRepository;
 import br.com.ciccr.simo.modules.attendance.validator.AttendanceValidator;
 import br.com.ciccr.simo.modules.force.model.Force;
 import br.com.ciccr.simo.modules.user.model.User;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import br.com.ciccr.simo.modules.attendance.specification.AttendanceSpecification;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,29 +51,24 @@ public class AttendanceServiceImpl extends BaseService<Attendance, Long> impleme
 
         Force force = validator.validateForce(request.forceId());
 
-        List<AttendanceType> attendanceTypes = validator.validateAttendanceTypes(request.attendanceTypeIds());
+        List<AttendanceType> attendanceTypes =
+                validator.validateAttendanceTypes(request.attendanceTypeIds());
 
         User loggedUser = currentUserService.getCurrentUser();
 
         Attendance attendance = mapper.toEntity(request);
 
-        attendance.setForce(force);
-        attendance.setAttendanceTypes(attendanceTypes);
-        attendance.setCreatedUser(loggedUser);
-
-        attendance.setAttendanceDateTime(request.attendanceDateTime());
-
-        attendance.setStatus(AttendanceStatus.OPEN);
-        attendance.setVersion(1);
-        attendance.setActive(true);
-
-        attendance = save(attendance);
-
-        attendance.setProtocol(
-                protocolGenerator.generate("ATD", attendance.getId())
+        buildAttendance(
+                attendance,
+                request,
+                force,
+                attendanceTypes,
+                loggedUser
         );
 
         attendance = save(attendance);
+
+        attendance = generateProtocol(attendance);
 
         historyService.registerHistory(
                 attendance,
@@ -88,20 +83,48 @@ public class AttendanceServiceImpl extends BaseService<Attendance, Long> impleme
     @Transactional(readOnly = true)
     public AttendanceResponse findById(Long id) {
 
-        Attendance attendance = findOrThrow(
-                id,
-                AttendanceMessages.ATTENDANCE_NOT_FOUND
-        );
+        Attendance attendance =
+                validator.findAttendanceOrThrow(id);
 
         return mapper.toResponse(attendance);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AttendanceSummaryResponse> findAll(Pageable pageable) {
-
-        return repository.findAll(pageable)
+    public Page<AttendanceSummaryResponse> findAll(AttendanceFilterRequest filter, Pageable pageable) {
+        return repository.findAll(AttendanceSpecification.byFilter(filter), pageable)
                 .map(mapper::toSummaryResponse);
+    }
+
+    @Override
+    public AttendanceResponse update(Long id, UpdateAttendanceRequest request) {
+
+        Attendance attendance =
+                validator.findAttendanceOrThrow(id);
+
+        validator.validateEdition(attendance);
+
+        Force force =
+                validator.validateForce(request.forceId());
+
+        List<AttendanceType> attendanceTypes =
+                validator.validateAttendanceTypes(request.attendanceTypeIds());
+
+        mapper.update(request, attendance);
+
+        attendance.setForce(force);
+        attendance.setAttendanceTypes(attendanceTypes);
+        attendance.setVersion(attendance.getVersion() + 1);
+
+        attendance = save(attendance);
+
+        historyService.registerHistory(
+                attendance,
+                AttendanceAction.UPDATED,
+                "Atendimento atualizado."
+        );
+
+        return mapper.toResponse(attendance);
     }
 
     @Override
@@ -112,13 +135,11 @@ public class AttendanceServiceImpl extends BaseService<Attendance, Long> impleme
 
         validator.validateClose(attendance);
 
-        User loggedUser = currentUserService.getCurrentUser();
-
         attendance.setStatus(AttendanceStatus.CLOSED);
         attendance.setClosedAt(LocalDateTime.now());
-        attendance.setClosedBy(loggedUser);
+        attendance.setClosedBy(currentUserService.getCurrentUser());
 
-        save(attendance);
+        attendance = save(attendance);
 
         historyService.registerHistory(
                 attendance,
@@ -139,7 +160,7 @@ public class AttendanceServiceImpl extends BaseService<Attendance, Long> impleme
         attendance.setClosedAt(null);
         attendance.setClosedBy(null);
 
-        save(attendance);
+        attendance = save(attendance);
 
         historyService.registerHistory(
                 attendance,
@@ -156,45 +177,41 @@ public class AttendanceServiceImpl extends BaseService<Attendance, Long> impleme
 
         attendance.setActive(false);
 
-        save(attendance);
+        attendance = save(attendance);
 
         historyService.registerHistory(
                 attendance,
                 AttendanceAction.DEACTIVATED,
                 "Atendimento desativado."
         );
-
     }
 
-    @Override
-    public AttendanceResponse update(Long id, UpdateAttendanceRequest request) {
-
-        Attendance attendance = validator.findAttendanceOrThrow(id);
-
-        validator.validateEdition(attendance);
-
-        Force force = validator.validateForce(request.forceId());
-
-        List<AttendanceType> attendanceTypes =
-                validator.validateAttendanceTypes(request.attendanceTypeIds());
-
-        mapper.update(request, attendance);
+    private void buildAttendance(
+            Attendance attendance,
+            CreateAttendanceRequest request,
+            Force force,
+            List<AttendanceType> attendanceTypes,
+            User loggedUser) {
 
         attendance.setForce(force);
         attendance.setAttendanceTypes(attendanceTypes);
+        attendance.setCreatedUser(loggedUser);
+        attendance.setAttendanceDateTime(request.attendanceDateTime());
+        attendance.setStatus(AttendanceStatus.OPEN);
+        attendance.setVersion(1);
+        attendance.setActive(true);
+    }
 
-        attendance.setVersion(attendance.getVersion() + 1);
+    private Attendance generateProtocol(Attendance attendance) {
 
-        Attendance updated = repository.save(attendance);
-
-        historyService.registerHistory(
-                updated,
-                AttendanceAction.UPDATED,
-                "Atendimento atualizado."
+        attendance.setProtocol(
+                protocolGenerator.generate(
+                        "ATD",
+                        attendance.getId()
+                )
         );
 
-        return mapper.toResponse(updated);
-
+        return save(attendance);
     }
 
 }

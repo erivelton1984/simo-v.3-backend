@@ -22,9 +22,6 @@ public final class AttendanceMessages {
     public static final String LIST =
             "Atendimentos encontrados.";
 
-    public static final String ATTENDANCE_NOT_FOUND =
-            "Atendente não encontrado.";
-
     public static final String NOT_FOUND =
             "Atendimento não encontrado.";
 
@@ -37,9 +34,9 @@ public final class AttendanceMessages {
     public static final String PROTOCOL_ALREADY_EXISTS =
             "Já existe um atendimento com este protocolo.";
 
-    public static final String ATTENDANCE_CANCELED_NOT_ARE_ALTERED =
+    public static final String CANCELED_CANNOT_BE_UPDATED =
             "Um atendimento cancelado não pode ser alterado.";
 
-    public static final String ATTENDANCE_ALREADY_CLOSED =
-            "Atendente pode fechar o atendimento.";
+    public static final String SNAPSHOT_ERROR =
+            "Erro ao gerar histórico do atendimento.";
 }
