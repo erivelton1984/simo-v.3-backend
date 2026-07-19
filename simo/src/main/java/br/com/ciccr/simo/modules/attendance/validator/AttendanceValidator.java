@@ -28,7 +28,7 @@ public class AttendanceValidator {
         return attendanceRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                AttendanceMessages.ATTENDANCE_NOT_FOUND
+                                AttendanceMessages.NOT_FOUND
                         ));
     }
 
@@ -51,14 +51,14 @@ public class AttendanceValidator {
     public void validateEdition(Attendance attendance) {
 
         if (attendance.getStatus() == AttendanceStatus.CANCELLED) {
-            throw new BusinessException(AttendanceMessages.ATTENDANCE_CANCELED_NOT_ARE_ALTERED);
+            throw new BusinessException(AttendanceMessages.CANCELED_CANNOT_BE_UPDATED);
         }
     }
 
     public void validateClose(Attendance attendance) {
 
         if (attendance.getStatus() == AttendanceStatus.CLOSED) {
-            throw new BusinessException(AttendanceMessages.ATTENDANCE_ALREADY_CLOSED);
+            throw new BusinessException(AttendanceMessages.ALREADY_CLOSED);
         }
     }
 
