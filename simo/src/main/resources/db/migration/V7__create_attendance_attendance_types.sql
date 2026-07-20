@@ -1,4 +1,4 @@
-CREATE TABLE attendance_attendance_type
+CREATE TABLE attendance_attendance_types
 (
     attendance_id BIGINT NOT NULL,
 
@@ -12,5 +12,5 @@ CREATE TABLE attendance_attendance_type
 
     CONSTRAINT fk_attendance_type
         FOREIGN KEY (attendance_type_id)
-            REFERENCES attendance_type(id)
+            REFERENCES attendance_types(id)
 );

@@ -117,7 +117,6 @@ public class AttendanceController extends BaseController {
             @ApiResponse(responseCode = "401", description = "Usuário não autenticado."),
             @ApiResponse(responseCode = "403", description = "Acesso negado.")
     })
-    @PostMapping
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

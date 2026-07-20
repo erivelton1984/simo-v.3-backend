@@ -1,15 +1,17 @@
 package br.com.ciccr.simo.modules.transparency.dto.response;
 
+import br.com.ciccr.simo.modules.transparency.enums.EmploymentStatus;
+import br.com.ciccr.simo.modules.transparency.enums.LinkType;
+
 public record TransparencyLinkResponse(
 
-        String instituicao,
-        String cargo,
-        String quadroFuncional,
-        String situacao,
-        boolean pertenceSesp,
-        boolean ativo,
-        boolean comissionado,
-        boolean estatutario
+        String institution,
+        String position,
+        String functionalFramework,
+
+        EmploymentStatus employmentStatus,
+
+        LinkType linkType
 
 ) {
 }

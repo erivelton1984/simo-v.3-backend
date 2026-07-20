@@ -1,38 +1,38 @@
 package br.com.ciccr.simo.modules.transparency.controller;
 
+import br.com.ciccr.simo.common.controller.BaseController;
+import br.com.ciccr.simo.common.response.ApiResult;
 import br.com.ciccr.simo.modules.transparency.dto.response.TransparencyResponse;
-import br.com.ciccr.simo.modules.transparency.dto.response.TransparencySessionResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import br.com.ciccr.simo.modules.transparency.service.TransparencyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/portal")
-public class TransparencyController {
+@Validated
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/transparency")
+@Tag(name = "Portal da Transparência")
+public class TransparencyController extends BaseController {
 
-    private final PortalService portalService;
-    private final ServidorService servidorService;
+    private final TransparencyService service;
 
-    public TransparencyController(
-            PortalService portalService,
-            ServidorService servidorService
-    ) {
-        this.portalService = portalService;
-        this.servidorService = servidorService;
-    }
+    @GetMapping("/search")
+    @Operation(summary = "Consulta um servidor no Portal da Transparência")
+    public ResponseEntity<ApiResult<TransparencyResponse>> search(
 
-    @GetMapping("/servidor")
-    public TransparencyResponse consultar(
-            @RequestParam String nome
+            @RequestParam
+            @NotBlank(message = "Informe o nome do servidor.")
+            String name) {
 
-    ) throws Exception {
-
-        TransparencySessionResponse session = portalService.abrirSessao();
-
-        return servidorService.pesquisarServidor(
-                session,
-                nome
+        return ok(
+                "Consulta realizada com sucesso.",
+                service.search(name)
         );
     }
+
 }

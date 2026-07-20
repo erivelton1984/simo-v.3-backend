@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -21,7 +22,8 @@ public class TransparencySessionService {
 
     private final TransparencyHttpClient httpClient;
 
-    public TransparencySessionResponse openSession() throws Exception {
+    public TransparencySessionResponse openSession()
+            throws IOException, InterruptedException {
 
         HttpResponse<String> response = executeRequest();
 
@@ -38,7 +40,8 @@ public class TransparencySessionService {
         );
     }
 
-    private HttpResponse<String> executeRequest() throws Exception {
+    private HttpResponse<String> executeRequest()
+            throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(PORTAL_URL))

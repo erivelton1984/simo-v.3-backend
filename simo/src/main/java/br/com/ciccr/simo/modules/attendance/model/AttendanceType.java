@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "attendance_type")
+@Table(name = "attendance_types")
 @Getter
 @Setter
 public class AttendanceType extends BaseEntity {
