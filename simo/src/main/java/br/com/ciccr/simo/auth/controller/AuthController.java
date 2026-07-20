@@ -4,7 +4,7 @@ import br.com.ciccr.simo.auth.dto.request.LoginRequest;
 import br.com.ciccr.simo.auth.dto.response.LoginResponse;
 import br.com.ciccr.simo.auth.service.AuthenticationService;
 import br.com.ciccr.simo.common.controller.BaseController;
-import br.com.ciccr.simo.common.response.ApiResponse;
+import br.com.ciccr.simo.common.response.ApiResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ public class AuthController extends BaseController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResult<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         return ok("Login realizado com sucesso.", authenticationService.login(request));
     }
 }
