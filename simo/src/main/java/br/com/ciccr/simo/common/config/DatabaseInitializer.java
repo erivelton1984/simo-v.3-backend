@@ -1,4 +1,4 @@
-package br.com.ciccr.simo.common.config;
+/*package br.com.ciccr.simo.common.config;
 
 import br.com.ciccr.simo.modules.role.enums.RoleName;
 import br.com.ciccr.simo.modules.role.model.Role;
@@ -55,4 +55,4 @@ public class DatabaseInitializer implements CommandLineRunner {
         log.info("=========================================");
     }
 
-}
+}*/
