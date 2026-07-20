@@ -5,7 +5,6 @@ import java.net.CookiePolicy;
 import java.net.http.HttpClient;
 import java.time.Duration;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
