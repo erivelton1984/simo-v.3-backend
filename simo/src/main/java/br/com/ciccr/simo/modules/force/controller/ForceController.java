@@ -1,7 +1,7 @@
 package br.com.ciccr.simo.modules.force.controller;
 
 import br.com.ciccr.simo.common.controller.BaseController;
-import br.com.ciccr.simo.common.response.ApiResponse;
+import br.com.ciccr.simo.common.response.ApiResult;
 import br.com.ciccr.simo.modules.force.constants.ForceMessages;
 import br.com.ciccr.simo.modules.force.dto.request.CreateForceRequest;
 import br.com.ciccr.simo.modules.force.dto.request.UpdateForceRequest;
@@ -22,23 +22,23 @@ public class ForceController extends BaseController {
     private final ForceService service;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ForceResponse>> create(@Valid @RequestBody CreateForceRequest request) {
+    public ResponseEntity<ApiResult<ForceResponse>> create(@Valid @RequestBody CreateForceRequest request) {
         return created(ForceMessages.CREATED, service.create(request));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ForceResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResult<ForceResponse>> findById(@PathVariable Long id) {
         return ok(ForceMessages.FOUND, service.findById(id));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ForceResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResult<Page<ForceResponse>>> findAll(Pageable pageable) {
         return ok(ForceMessages.LIST, service.findAll(pageable));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ForceResponse>> update(@PathVariable Long id,
-                                                             @Valid @RequestBody UpdateForceRequest request) {
+    public ResponseEntity<ApiResult<ForceResponse>> update(@PathVariable Long id,
+                                                           @Valid @RequestBody UpdateForceRequest request) {
         return ok(ForceMessages.UPDATED, service.update(id, request));
     }
 
