@@ -4,19 +4,21 @@ CREATE TABLE users
 
     full_name VARCHAR(150) NOT NULL,
 
-    cpf VARCHAR(15) NOT NULL,
+    /*cpf VARCHAR(15) NOT NULL,
 
     registration VARCHAR(150) NOT NULL,
 
     phone VARCHAR(15) NOT NULL,
 
-    position VARCHAR(20) NOT NULL,
+    position VARCHAR(20) NOT NULL,*/
 
     email VARCHAR(150) NOT NULL UNIQUE,
 
     password VARCHAR(255) NOT NULL,
 
     active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    locked BOOLEAN NOT NULL DEFAULT FALSE,
 
     role_id BIGINT NOT NULL,
 

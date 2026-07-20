@@ -1,18 +1,18 @@
 package br.com.ciccr.simo.modules.user.model;
 
-import br.com.ciccr.simo.common.audit.Auditable;
 import br.com.ciccr.simo.common.model.BaseEntity;
 import br.com.ciccr.simo.modules.role.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class User extends BaseEntity {
 
     @Column(nullable = false, length = 150)

@@ -1,67 +1,95 @@
 package br.com.ciccr.simo.modules.transparency.validator;
 
-import lombok.NoArgsConstructor;
+import br.com.ciccr.simo.modules.transparency.enums.EmploymentStatus;
+import br.com.ciccr.simo.modules.transparency.enums.LinkType;
 import org.springframework.stereotype.Component;
 
 @Component
-@NoArgsConstructor
 public class TransparencyValidator {
 
-    public boolean belongsToPublicSecurity(
-            TransparencyServerResponse response) {
+    public boolean belongsToSecurityDepartment(String institution) {
 
-        if (response.getInstitution() == null) {
+        if (institution == null || institution.isBlank()) {
             return false;
         }
 
-        String text =
-                response.getInstitution().toUpperCase();
+        String text = institution.toUpperCase();
 
         return text.contains("SECRETARIA DA SEGURAN")
                 || text.contains("SESP");
     }
 
-    public boolean isActive(
-            TransparencyServerResponse response) {
+    public EmploymentStatus resolveEmploymentStatus(String value) {
 
-        return response.getEmploymentStatus() != null
-                && response.getEmploymentStatus().isActive();
-    }
-
-    public boolean isEffectiveEmployee(
-            TransparencyServerResponse response) {
-
-        if (response.getFunctionalFramework() == null) {
-            return false;
+        if (value == null || value.isBlank()) {
+            return EmploymentStatus.DESCONHECIDO;
         }
 
-        String text =
-                response.getFunctionalFramework().toUpperCase();
+        String text = value.toUpperCase();
 
-        return text.contains("POLÍCIA MILITAR")
-                || text.contains("POLICIA MILITAR")
-                || text.contains("POLÍCIA CIVIL")
-                || text.contains("POLICIA CIVIL")
-                || text.contains("POLÍCIA PENAL")
-                || text.contains("POLICIA PENAL")
-                || text.contains("BOMBEIRO")
-                || text.contains("PERITO")
-                || text.contains("PAPILOSCOPISTA");
-    }
-
-    public boolean isCommissioned(
-            TransparencyServerResponse response) {
-
-        if (response.getFunctionalFramework() == null) {
-            return false;
+        if (text.contains("ATIVO")) {
+            return EmploymentStatus.ATIVO;
         }
 
-        String text =
-                response.getFunctionalFramework().toUpperCase();
+        if (text.contains("APOSENTADO")) {
+            return EmploymentStatus.APOSENTADO;
+        }
 
-        return text.contains("COMISSIONADO")
+        if (text.contains("ENCERRADO")) {
+            return EmploymentStatus.ENCERRADO;
+        }
+
+        return EmploymentStatus.DESCONHECIDO;
+    }
+
+    public LinkType resolveLinkType(String functionalFramework) {
+
+        if (functionalFramework == null || functionalFramework.isBlank()) {
+            return LinkType.OUTRO;
+        }
+
+        String text = functionalFramework.toUpperCase();
+
+        if (text.contains("POLÍCIA MILITAR")
+                || text.contains("POLICIA MILITAR")) {
+            return LinkType.PMPR;
+        }
+
+        if (text.contains("POLÍCIA CIVIL")
+                || text.contains("POLICIA CIVIL")) {
+            return LinkType.PCPR;
+        }
+
+        if (text.contains("BOMBEIRO")) {
+            return LinkType.CBMPR;
+        }
+
+        if (text.contains("POLÍCIA PENAL")
+                || text.contains("POLICIA PENAL")) {
+            return LinkType.POLICIA_PENAL;
+        }
+
+        if (text.contains("PERITO")
+                || text.contains("PAPILOSCOPISTA")
+                || text.contains("POLÍCIA CIENTÍFICA")
+                || text.contains("POLICIA CIENTIFICA")) {
+            return LinkType.POLICIA_CIENTIFICA;
+        }
+
+        if (text.contains("COMISSIONADO")
                 || text.contains("FUNÇÃO COMISSIONADA")
-                || text.contains("FUNCAO COMISSIONADA");
+                || text.contains("FUNCAO COMISSIONADA")) {
+            return LinkType.CARGO_COMISSIONADO;
+        }
+
+        if (text.contains("SERVIDOR")
+                || text.contains("AGENTE PROFISSIONAL")
+                || text.contains("AGENTE DE EXECUÇÃO")
+                || text.contains("AGENTE DE APOIO")) {
+            return LinkType.SERVIDOR_CIVIL;
+        }
+
+        return LinkType.OUTRO;
     }
 
 }
