@@ -12,45 +12,29 @@ import java.util.List;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final Long id;
+    private final String fullName;
+    private final String username;
+    private final String password;
+    private final Boolean active;
+    private final String role;
 
     public CustomUserDetails(User user) {
-        this.user = user;
-    }
 
-    public Long getId() {
-        return user.getId();
-    }
-
-    public String getFullName() {
-        return user.getFullName();
-    }
-
-    public String getRole() {
-        return user.getRole().getName().name();
+        this.id = user.getId();
+        this.fullName = user.getFullName();
+        this.username = user.getEmail();
+        this.password = user.getPassword();
+        this.active = user.getActive();
+        this.role = user.getRole().getName().name();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         return List.of(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().getName())
+                new SimpleGrantedAuthority("ROLE_" + role)
         );
-    }
-
-    @Override
-    public String getPassword() {
-        return user.getPassword();
-    }
-
-    @Override
-    public String getUsername() {
-        return user.getEmail();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return user.getActive();
     }
 
     @Override
