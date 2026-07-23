@@ -5,6 +5,10 @@ public enum EmploymentStatus {
     ATIVO,
     APOSENTADO,
     ENCERRADO,
-    DESCONHECIDO
+    DESCONHECIDO;
+
+    public boolean isActive() {
+        return this == EmploymentStatus.ATIVO;
+    }
 
 }
