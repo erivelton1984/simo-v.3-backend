@@ -1,10 +1,12 @@
 package br.com.ciccr.simo.modules.transparency.dto.response;
 
+import java.util.List;
+
 public record TransparencySearchResult(
 
-        String panel,
         String viewState,
-        String commandId
+
+        List<TransparencySearchItem> items
 
 ) {
 }

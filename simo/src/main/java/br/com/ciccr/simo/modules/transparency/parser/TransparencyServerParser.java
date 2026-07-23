@@ -1,5 +1,6 @@
 package br.com.ciccr.simo.modules.transparency.parser;
 
+import br.com.ciccr.simo.modules.force.enums.SecurityForce;
 import br.com.ciccr.simo.modules.transparency.dto.response.TransparencyLinkResponse;
 import br.com.ciccr.simo.modules.transparency.dto.response.TransparencyResponse;
 import br.com.ciccr.simo.modules.transparency.enums.EmploymentStatus;
@@ -25,17 +26,19 @@ public class TransparencyServerParser {
 
         Document document = Jsoup.parse(html);
 
-        String name = extractName(document);
+        String nome = extractName(document);
         String cpf = extractCpf(document);
 
-        List<TransparencyLinkResponse> links =
+        List<TransparencyLinkResponse> vinculos =
                 extractLinks(document);
 
         return new TransparencyResponse(
-                name,
+                nome,
                 cpf,
-                belongsToSecurityDepartment(links),
-                links
+                belongsToSecurityDepartment(vinculos),
+                null,
+                false,
+                vinculos
         );
     }
 

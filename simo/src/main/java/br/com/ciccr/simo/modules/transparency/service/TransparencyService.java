@@ -2,11 +2,11 @@ package br.com.ciccr.simo.modules.transparency.service;
 
 import br.com.ciccr.simo.common.exception.BusinessException;
 import br.com.ciccr.simo.modules.transparency.client.TransparencyHttpClient;
-import br.com.ciccr.simo.modules.transparency.dto.response.TransparencyResponse;
-import br.com.ciccr.simo.modules.transparency.dto.response.TransparencySessionResponse;
-import br.com.ciccr.simo.modules.transparency.dto.response.TransparencySearchResult;
+import br.com.ciccr.simo.modules.transparency.dto.response.*;
 import br.com.ciccr.simo.modules.transparency.parser.TransparencyParser;
 import br.com.ciccr.simo.modules.transparency.parser.TransparencyServerParser;
+import br.com.ciccr.simo.modules.transparency.util.TransparencySearchMatcher;
+import br.com.ciccr.simo.modules.transparency.util.TransparencyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,21 +39,18 @@ public class TransparencyService {
             TransparencySessionResponse session =
                     sessionService.openSession();
 
-            HttpResponse<String> response =
-                    executeSearch(session, name);
+            TransparencySearchResult searchResult =
+                    searchServer(session, name);
 
-            TransparencySearchResult result =
-                    transparencyParser.parse(response.body());
+            TransparencySearchItem selected =
+                    findBestMatch(name, searchResult);
 
             String details =
-                    openDetails(
-                            session,
-                            name,
-                            result.viewState(),
-                            result.commandId()
-                    );
+                    openDetails(session, name, searchResult.viewState(), selected.commandId());
 
-            return serverParser.parse(details);
+            return enrichResponse(
+                    serverParser.parse(details)
+            );
 
         } catch (IOException ex) {
 
@@ -71,18 +68,18 @@ public class TransparencyService {
         }
     }
 
-    private HttpResponse<String> executeSearch(
+    private TransparencySearchResult searchServer(
             TransparencySessionResponse session,
             String name)
             throws IOException, InterruptedException {
 
-        HttpRequest request =
-                buildSearchRequest(session, name);
+        HttpResponse<String> response =
+                httpClient.getClient().send(
+                        buildSearchRequest(session, name),
+                        HttpResponse.BodyHandlers.ofString()
+                );
 
-        return httpClient.getClient().send(
-                request,
-                HttpResponse.BodyHandlers.ofString()
-        );
+        return transparencyParser.parse(response.body());
     }
 
     private String openDetails(
@@ -92,21 +89,30 @@ public class TransparencyService {
             String commandId)
             throws IOException, InterruptedException {
 
-        HttpRequest request =
-                buildDetailsRequest(
-                        session,
-                        name,
-                        viewState,
-                        commandId
-                );
-
         HttpResponse<String> response =
                 httpClient.getClient().send(
-                        request,
+                        buildDetailsRequest(session, name, viewState, commandId),
                         HttpResponse.BodyHandlers.ofString()
                 );
 
         return response.body();
+    }
+
+    private TransparencySearchItem findBestMatch(
+            String searchedName,
+            TransparencySearchResult result) {
+
+        TransparencySearchItem item =
+                TransparencySearchMatcher.findBestMatch(
+                        searchedName,
+                        result.items()
+                );
+
+        if (item == null) {
+            throw new BusinessException("Servidor não encontrado.");
+        }
+
+        return item;
     }
 
     private HttpRequest buildSearchRequest(
@@ -114,25 +120,11 @@ public class TransparencyService {
             String name) {
 
         return HttpRequest.newBuilder()
-                .uri(URI.create(
-                        BASE_URL + "?windowId=" + session.windowId()
-                ))
-                .header(
-                        "Content-Type",
-                        "application/x-www-form-urlencoded"
-                )
-                .header(
-                        "Faces-Request",
-                        "partial/ajax"
-                )
-                .header(
-                        "X-Requested-With",
-                        "XMLHttpRequest"
-                )
-                .header(
-                        "Cookie",
-                        session.cookie()
-                )
+                .uri(URI.create(BASE_URL + "?windowId=" + session.windowId()))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Faces-Request", "partial/ajax")
+                .header("X-Requested-With", "XMLHttpRequest")
+                .header("Cookie", session.cookie())
                 .POST(HttpRequest.BodyPublishers.ofString(
                         buildSearchForm(session, name)
                 ))
@@ -146,23 +138,11 @@ public class TransparencyService {
             String commandId) {
 
         return HttpRequest.newBuilder()
-                .uri(URI.create(
-                        BASE_URL + "?windowId=" + session.windowId()
-                ))
-                .header(
-                        "Content-Type",
-                        "application/x-www-form-urlencoded"
-                )
-                .header(
-                        "Cookie",
-                        session.cookie()
-                )
+                .uri(URI.create(BASE_URL + "?windowId=" + session.windowId()))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Cookie", session.cookie())
                 .POST(HttpRequest.BodyPublishers.ofString(
-                        buildDetailsForm(
-                                name,
-                                viewState,
-                                commandId
-                        )
+                        buildDetailsForm(name, viewState, commandId)
                 ))
                 .build();
     }
@@ -209,4 +189,16 @@ public class TransparencyService {
         );
     }
 
+    private TransparencyResponse enrichResponse(
+            TransparencyResponse response) {
+
+        return new TransparencyResponse(
+                response.nome(),
+                response.cpf(),
+                response.pertenceSesp(),
+                TransparencyUtil.identifySecurityForce(response.vinculos()),
+                TransparencyUtil.isForceActive(response.vinculos()),
+                response.vinculos()
+        );
+    }
 }
